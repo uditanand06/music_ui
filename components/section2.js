@@ -17,7 +17,7 @@ const Section2 = () => {
     formData.append("audioFile", data.file[0]);
     console.log(formData)
 
-    const res = await fetch("http://localhost:3000/api/test", {
+    const res = await fetch("http://localhost:5000/api/predict", {
         method: "POST",
         body: formData,
     }).then((res) =>{res.json();setGenre(res.genre); } );
