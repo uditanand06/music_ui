@@ -20,7 +20,7 @@ const Section2 = () => {
     const res = await fetch("http://localhost:3000/api/test", {
         method: "POST",
         body: formData,
-    }).then((res) =>{res.json();setGenre("found"); } );
+    }).then((res) =>{res.json();setGenre(res.genre); } );
     setLoading(false);
   };
 
