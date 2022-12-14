@@ -3,34 +3,73 @@ import Light from './lights'
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FidgetSpinner } from 'react-loader-spinner'
+import { Chart } from "react-google-charts";
+import axios from 'axios';
 
 const Section2 = () => {
   const [loading,setLoading] = useState(false);
   const { register, handleSubmit } = useForm();
-  const [genre,setGenre] = useState("none");
+  const [genre,setGenre] = useState(["none"]);
+  const [predictions,setPredictions] = useState();
+  const [tags,setTags] = useState();
 
   useEffect(() => {  },[loading]);
 
   const onSubmit = async (data) => {
     setLoading(true)
-    const formData = new FormData();
-    formData.append("audioFile", data.file[0]);
-    console.log(formData)
+    try {
+      const formData = new FormData();
+      formData.append("audioFile", data.file[0]);
+      console.log(formData)
+      //const res = axios.post('http://localhost:5000/api/predict',formData);
+      const res = await fetch("http://localhost:5000/api/predict", {
+          method: "POST",
+          body: formData,
+      }).then((res) => res.json());
+      console.log(res)
+      setGenre((res.genre).join(', '));
+      setPredictions(res.predictions);
 
-    const res = await fetch("http://localhost:5000/api/predict", {
-        method: "POST",
-        body: formData,
-    }).then((res) =>{res.json();setGenre(res.genre); } );
+    } catch (error) {
+      console.log(error.message)
+    }
     setLoading(false);
   };
 
+
+//   const data = [
+//   ["Genre", "Percentage"],
+//   ["Pop", 10],
+//   ["Reggae", 20],
+//   ["Sufi", 30],
+//   ["Trance", 40],
+  
+// ];
+
+
+
+const options = {
+  chart: {
+    title: "Genre Classification",
+    subtitle: "Percentage of each genre for the music provided",
+  },
+  colors: ["#610094"],
+  
+  backgroundColor: '#000',
+  chartArea: {
+    backgroundColor: {
+      fill: '#000',
+    },
+  },
+   
+};
 
   return (
     <>
       {
         loading?
         <>
-            <div className=" grid justify-center items-center h-screen w-screen">
+            <div className="grid justify-center items-center p-20">
                 <FidgetSpinner
                     visible={true}
                     height="150"
@@ -38,8 +77,8 @@ const Section2 = () => {
                     ariaLabel="dna-loading"
                     wrapperStyle={{}}
                     wrapperClass="dna-wrapper"
-                    ballColors={['#ff0000', '#00ff00', '#0000ff']}
-                    backgroundColor="#db2777"
+                    ballColors={['#fff', '#fff', '#fff']}
+                    backgroundColor="#610094"
                 />
             </div>
         
@@ -59,7 +98,37 @@ const Section2 = () => {
           </div>
           {/* <div className='blueBtn mx-auto  w-[226px] h-[55px] font-medium text-[20px]'>Analyze</div> */}
           <div className='bg-[rgba(217,217,217,0.08)] font-normal text-[32px] rounded-[50px] w-[35%] text-center py-4'>The Genre of your music is :</div>
-          <div className='h-[72px] w-[244px] bg-[rgba(97,0,148,0.5)] rounded-[50px] center mx-auto text-[36px] font-bold'>{genre}</div>
+          <div className='w-fit bg-[rgba(97,0,148,0.5)] rounded-[50px] center mx-auto text-[36px] font-bold capitalize px-4 py-2'>
+          {/* {genre.map((user,i,arr) => (
+            if(arr.length-1 == i)
+            {
+              <div className="ml-1">{user}, </div>
+            }else{
+              <div className="ml-1">{user}, </div>
+            }
+
+            
+          ))} */}
+          {genre}
+          </div>
+          {
+            predictions?
+            <div className='center'>
+              <Chart
+                className='mx-auto'
+                chartType="Bar"
+                width="75%"
+                height="400px"
+                data={predictions}
+                options={options}
+              />
+            </div>
+            :
+            <>
+
+            </>
+          }
+          
           <div className='absolute bottom-0 right-0 '>
             <Light/>
           </div>
