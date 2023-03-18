@@ -12,6 +12,7 @@ const Section2 = () => {
   const [genre,setGenre] = useState(["none"]);
   const [predictions,setPredictions] = useState();
   const [tags,setTags] = useState();
+  const token="BQC9dFAEIJ9ts51y_m0YYV2T8d08SnZy0b7HwGS5EBI_nMxeg9u8r7puu71bFC9yzmxwr0uKIxISmPmrpJ91DKxh7aN6mQMHIJtFuunuG7j-k0jZr30sVuddts3N5nBtwePRv5iEN9Nz2KHXaNRurpbRvR7Ggr_b4o9y4X3QTVJL-JtdKkafUB4rexap40rBEmVWXcRFLEEQgOlsZKu_WKPvNcQbl1e1MvvZn1JXeVv3E78gYor0nus8mG7FtVQFfQrRjrabKOZAowBmjrjJqjfwMGd53OgBf_h-H-_uacVTkOFm6sYbre6J-QPzQ3lFtu4zW8CQsQ"
 
   useEffect(() => {  },[loading]);
 
@@ -36,6 +37,44 @@ const Section2 = () => {
     setLoading(false);
   };
 
+  const CLIENT_ID = "8e94e538c00b4403b4fe7dce740856bd"
+  const REDIRECT_URI = "http://localhost:3001"
+  const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"
+  const RESPONSE_TYPE = "token"
+
+  const onSubmit1 = async (data) => {
+    setLoading(true)
+    try {
+      // const formData = new FormData();
+      // formData.append("audioFile", data.file[0]);
+      // console.log(formData)
+      // //const res = axios.post('http://localhost:5000/api/predict',formData);
+      // const res = await fetch("http://localhost:5000/api/predict", {
+      //     method: "POST",
+      //     body: formData,
+      // }).then((res) => res.json());
+      // console.log(res)
+      // setGenre((res.genre).join(', '));
+      // setPredictions(res.predictions);
+
+      console.log(data.musicid)
+      const data1 = await fetch(`https://api.spotify.com/v1/audio-features/${data.musicid}`, {
+            method:"GET",
+            headers: {
+              'Accept': 'application/json',
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+                
+            },
+        }).then((res) => res.json())
+        console.log(data1)
+
+
+    } catch (error) {
+      console.log(error.message)
+    }
+    setLoading(false);
+  };
 
 //   const data = [
 //   ["Genre", "Percentage"],
@@ -128,6 +167,15 @@ const options = {
 
             </>
           }
+
+          <div>
+              <form onSubmit={handleSubmit(onSubmit1)} className="flex flex-col justify-between items-center space-y-5">
+                  <input className="input shadow-md  border-pink-500 px-4 py-2 rounded-2xl border-2 text-lg text-center bg-gradient-to-r from-fuchsia-600 to-pink-600 text-transparent bg-clip-text" type="text" {...register("musicid")} />
+                  <button className='blueBtn mx-auto  w-[226px] h-[55px] font-medium text-[20px] active:shadow-md transtion'>Analyze</button>
+                  <input type="submit" className="hidden"/>
+              </form>
+          </div>
+          
           
           <div className='absolute bottom-0 right-0 '>
             <Light/>
