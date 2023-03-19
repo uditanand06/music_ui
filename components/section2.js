@@ -13,7 +13,7 @@ const Section2 = () => {
   const [predictions,setPredictions] = useState();
   const [emotion, setEmotion] = useState();
   const [tags,setTags] = useState();
-  const token="BQC7fPLp6vaCz6objMCZ4RkFFtGuGidb1hMCxcGpVg4yIjoFshAUtbzyJQSZwltufWA8NIZavcP1ir2DyAb9bF8Qcg1C0tMqnAj-x-EezTySe909hQuRfkqy20F_hDBOPITWL0rqB_ShPwoDbfAMJdzaGzjf6SXy9dNW-V9k0TFdf8DvUXX1oFTeWLiIEHgkXY_c7eVDMtTAR21L6lCdF5TlYFXCBmSR3ImUehlc2m-y-AxmPooIoJm3xovvSWh3m2g_rz7OVHs7KsqO2QsJRMvMVgnKoN79b536zQFz7OcLc2SAv0_JJP5xlbsemyK7y-8zV3ZtWg"
+  const token="BQDXHJs3BKKQEWLGy_bnj-AD26XWE9hSl9596Y4cGVmIwXRppkKaiVaO0qd6QUSnKMu7-XjkN0u_O3jSX8pHoc8v9SWtGcACeV8LfgOS5W5F246Oqm8DrkNXS-kTdZNty7nuUHCGFgE39aKecscloTaFeW93o5P11H7NTdAfugEkUXvjibJ5yJfICXFjQW4zkldrLD_4oMUD7QgKldFpn_j9tsimZPEcfY-Vc5SttGfC7w1BW1vZSyQy_SgDEQQTDC2ZVVn5t-dky-VTeyw9irE9A_aJpK14BXnBod7DaUaMpdCIPqdANrk8kAgH1Fsj0-RpAOw"
 
   useEffect(() => {  },[loading]);
 
@@ -29,6 +29,7 @@ const Section2 = () => {
           body: formData,
       }).then((res) => res.json());
       console.log(res)
+      calculateEmotion(res.valence,res.arousal)
       setGenre((res.genre).join(', '));
       setPredictions(res.predictions);
 
@@ -38,69 +39,11 @@ const Section2 = () => {
     setLoading(false);
   };
 
-  const CLIENT_ID = "8e94e538c00b4403b4fe7dce740856bd"
-  const REDIRECT_URI = "http://localhost:3001"
-  const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"
-  const RESPONSE_TYPE = "token"
 
-  const onSubmit1 = async (data) => {
-    setLoading(true)
-    try {
-      // const formData = new FormData();
-      // formData.append("audioFile", data.file[0]);
-      // console.log(formData)
-      // //const res = axios.post('http://localhost:5000/api/predict',formData);
-      // const res = await fetch("http://localhost:5000/api/predict", {
-      //     method: "POST",
-      //     body: formData,
-      // }).then((res) => res.json());
-      // console.log(res)
-      // setGenre((res.genre).join(', '));
-      // setPredictions(res.predictions);
-
-      console.log(data.musicid)
-      var arrid=data.musicid.split("/");
-      const data1 = await fetch(`https://api.spotify.com/v1/audio-features/${arrid.at(-1)}`, {
-            method:"GET",
-            headers: {
-              'Accept': 'application/json',
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`,
-                
-            },
-        }).then((res) => res.json())
-
-        var valence=data1.valence
-        var arousal=data1.danceability
+  const calculateEmotion = (valence,arousal) => {
         
-        //arousal -= 0.1;
-        // valence = (2 * valence) - 1;
-        // arousal = (2 * arousal) - 1;
-        // // console.log(valence)
-        // // console.log(arousal)
-        // var angle_rad = Math.atan(arousal, valence); // tan inverse (arousal / valence) // tan inverse (valence / arousal)
-        // if (angle_rad < 0) {
-        //     angle_rad = (2 * Math.PI) + angle_rad;
-        // }
-        // var angle_deg = ((angle_rad * 180) / Math.PI);
-        // angle_deg = angle_deg<0?angle_deg+=360:angle_deg;
-        //  // or a radian to degree function
-        // console.log(angle_deg)
-        // console.log(valence)
-        // console.log(arousal)
-        
-        
-        // if(valence>0 && arousal > 0) {setEmotion("happy")}
-        // else if( valence < 0 && arousal > 0) {setEmotion("tense")}
-        // else if(valence<0 && arousal < 0) {setEmotion("depressed")}
-        // else if(valence>0 && arousal < 0) {setEmotion("calm")   } 
-
-        valence = (2 * valence) - 1;
-        arousal = (2 * arousal) - 1;
         var angle_rad = Math.atan2(arousal,valence);
-        console.log(angle_rad)
         var angle_deg = (180 * angle_rad) / Math.PI;
-        console.log(angle_deg)
         if (angle_deg < 0) {
             angle_deg += 360;
         }
@@ -131,18 +74,32 @@ const Section2 = () => {
         } else if (330 <= angle_deg && angle_deg < 360) {
             setEmotion("content");
         }
+
+  }
+
+  const onSubmit1 = async (data) => {
+    setLoading(true)
+    try {
+     
+      console.log(data.musicid)
+      var arrid=data.musicid.split("/");
+      const data1 = await fetch(`https://api.spotify.com/v1/audio-features/${arrid.at(-1)}`, {
+            method:"GET",
+            headers: {
+              'Accept': 'application/json',
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+                
+            },
+        }).then((res) => res.json())
+
+        var valence=data1.valence
+        var arousal=data1.danceability
+        valence = (2 * valence) - 1;
+        arousal = (2 * arousal) - 1;
+        calculateEmotion(valence,arousal)
         
-        
-        setTimeout(()=> {
-       }
-       ,3000);
           console.log(data1)
-          
-
-        
-        
-
-
     } catch (error) {
       console.log(error.message)
     }
