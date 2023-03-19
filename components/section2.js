@@ -11,8 +11,9 @@ const Section2 = () => {
   const { register, handleSubmit } = useForm();
   const [genre,setGenre] = useState(["none"]);
   const [predictions,setPredictions] = useState();
+  const [emotion, setEmotion] = useState();
   const [tags,setTags] = useState();
-  const token="BQC9dFAEIJ9ts51y_m0YYV2T8d08SnZy0b7HwGS5EBI_nMxeg9u8r7puu71bFC9yzmxwr0uKIxISmPmrpJ91DKxh7aN6mQMHIJtFuunuG7j-k0jZr30sVuddts3N5nBtwePRv5iEN9Nz2KHXaNRurpbRvR7Ggr_b4o9y4X3QTVJL-JtdKkafUB4rexap40rBEmVWXcRFLEEQgOlsZKu_WKPvNcQbl1e1MvvZn1JXeVv3E78gYor0nus8mG7FtVQFfQrRjrabKOZAowBmjrjJqjfwMGd53OgBf_h-H-_uacVTkOFm6sYbre6J-QPzQ3lFtu4zW8CQsQ"
+  const token="BQC7fPLp6vaCz6objMCZ4RkFFtGuGidb1hMCxcGpVg4yIjoFshAUtbzyJQSZwltufWA8NIZavcP1ir2DyAb9bF8Qcg1C0tMqnAj-x-EezTySe909hQuRfkqy20F_hDBOPITWL0rqB_ShPwoDbfAMJdzaGzjf6SXy9dNW-V9k0TFdf8DvUXX1oFTeWLiIEHgkXY_c7eVDMtTAR21L6lCdF5TlYFXCBmSR3ImUehlc2m-y-AxmPooIoJm3xovvSWh3m2g_rz7OVHs7KsqO2QsJRMvMVgnKoN79b536zQFz7OcLc2SAv0_JJP5xlbsemyK7y-8zV3ZtWg"
 
   useEffect(() => {  },[loading]);
 
@@ -58,7 +59,8 @@ const Section2 = () => {
       // setPredictions(res.predictions);
 
       console.log(data.musicid)
-      const data1 = await fetch(`https://api.spotify.com/v1/audio-features/${data.musicid}`, {
+      var arrid=data.musicid.split("/");
+      const data1 = await fetch(`https://api.spotify.com/v1/audio-features/${arrid.at(-1)}`, {
             method:"GET",
             headers: {
               'Accept': 'application/json',
@@ -67,7 +69,78 @@ const Section2 = () => {
                 
             },
         }).then((res) => res.json())
-        console.log(data1)
+
+        var valence=data1.valence
+        var arousal=data1.danceability
+        
+        //arousal -= 0.1;
+        // valence = (2 * valence) - 1;
+        // arousal = (2 * arousal) - 1;
+        // // console.log(valence)
+        // // console.log(arousal)
+        // var angle_rad = Math.atan(arousal, valence); // tan inverse (arousal / valence) // tan inverse (valence / arousal)
+        // if (angle_rad < 0) {
+        //     angle_rad = (2 * Math.PI) + angle_rad;
+        // }
+        // var angle_deg = ((angle_rad * 180) / Math.PI);
+        // angle_deg = angle_deg<0?angle_deg+=360:angle_deg;
+        //  // or a radian to degree function
+        // console.log(angle_deg)
+        // console.log(valence)
+        // console.log(arousal)
+        
+        
+        // if(valence>0 && arousal > 0) {setEmotion("happy")}
+        // else if( valence < 0 && arousal > 0) {setEmotion("tense")}
+        // else if(valence<0 && arousal < 0) {setEmotion("depressed")}
+        // else if(valence>0 && arousal < 0) {setEmotion("calm")   } 
+
+        valence = (2 * valence) - 1;
+        arousal = (2 * arousal) - 1;
+        var angle_rad = Math.atan2(arousal,valence);
+        console.log(angle_rad)
+        var angle_deg = (180 * angle_rad) / Math.PI;
+        console.log(angle_deg)
+        if (angle_deg < 0) {
+            angle_deg += 360;
+        }
+        console.log(valence, arousal, angle_rad, angle_deg);
+    
+        if (0 <= angle_deg && angle_deg < 30) {
+            setEmotion("happy");
+        } else if (30 <= angle_deg && angle_deg < 60) {
+            setEmotion("delighted");
+        } else if (60 <= angle_deg && angle_deg < 90) {
+            setEmotion("excited");
+        } else if (90 <= angle_deg && angle_deg < 120) {
+            setEmotion("tense");
+        } else if (120 <= angle_deg && angle_deg < 150) {
+            setEmotion("angry");
+        } else if (150 <= angle_deg && angle_deg < 180) {
+            setEmotion("frustrated");
+        } else if (180 <= angle_deg && angle_deg < 210) {
+            setEmotion("depressed");
+        } else if (210 <= angle_deg && angle_deg < 240) {
+            setEmotion("bored");
+        } else if (240 <= angle_deg && angle_deg < 270) {
+            setEmotion("tired");
+        } else if (270 <= angle_deg && angle_deg < 300) {
+            setEmotion("calm");
+        } else if (300 <= angle_deg && angle_deg < 330) {
+            setEmotion("relaxed");
+        } else if (330 <= angle_deg && angle_deg < 360) {
+            setEmotion("content");
+        }
+        
+        
+        setTimeout(()=> {
+       }
+       ,3000);
+          console.log(data1)
+          
+
+        
+        
 
 
     } catch (error) {
@@ -174,6 +247,11 @@ const options = {
                   <button className='blueBtn mx-auto  w-[226px] h-[55px] font-medium text-[20px] active:shadow-md transtion'>Analyze</button>
                   <input type="submit" className="hidden"/>
               </form>
+          </div>
+
+          <div className='bg-[rgba(217,217,217,0.08)] font-normal text-[32px] rounded-[50px] w-[35%] text-center py-4'>The Emotion of your music is :</div>
+          <div className='w-fit bg-[rgba(97,0,148,0.5)] rounded-[50px] center mx-auto text-[36px] font-bold capitalize px-4 py-2'>
+          {emotion}
           </div>
           
           
